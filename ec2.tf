@@ -1,7 +1,17 @@
 # configure aws provider with proper credentials
 provider "aws" {
-  region = "us-east-1"
+  region  = "us-east-1"
   profile = "terraform-user"
+}
+
+# store the terraform state file in s3
+terraform {
+  backend "s3" {
+    bucket  = "bucket-xander-881106"
+    key     = "build/terraform.tfstate"
+    region  = "us-east-1"
+    profile = "terraform-user"
+  }
 }
 
 # create default vpc if one does not exit
@@ -24,31 +34,31 @@ resource "aws_default_subnet" "default_az1" {
 }
 
 resource "aws_security_group" "ec2_security_group" {
-  name = "ec2 security group"
+  name        = "ec2 security group"
   description = "allow access on ports 80 and 22"
-  vpc_id = aws_default_vpc.default_vpc.id
+  vpc_id      = aws_default_vpc.default_vpc.id
 
   ingress {
-    description      = "http access"
-    from_port        = 80
-    to_port          = 80
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
+    description = "http access"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    description      = "ssh access"
-    from_port        = 22
-    to_port          = 22
-    protocol         = "tcp"
-    cidr_blocks      = ["108.48.102.126/32"]
+    description = "ssh access"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["108.48.102.126/32"]
   }
 
   egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
@@ -58,7 +68,7 @@ resource "aws_security_group" "ec2_security_group" {
 
 data "aws_ami" "amazon_linux_2" {
   most_recent = true
-  owners = ["amazon"]
+  owners      = ["amazon"]
 
   filter {
     name   = "owner-alias"
@@ -73,12 +83,12 @@ data "aws_ami" "amazon_linux_2" {
 
 # launch the ec2 instance and install website
 resource "aws_instance" "mathy_atis" {
-  ami = data.aws_ami.amazon_linux_2.id
-  instance_type = "t2.micro"
-  subnet_id = aws_default_subnet.default_az1.id
+  ami                    = data.aws_ami.amazon_linux_2.id
+  instance_type          = "t2.micro"
+  subnet_id              = aws_default_subnet.default_az1.id
   vpc_security_group_ids = [aws_security_group.ec2_security_group.id]
-  key_name = "newKey"
-  user_data = file("install_techmax.sh")
+  key_name               = "newKey"
+  user_data              = file("install_techmax.sh")
 
   tags = {
     Name = "terra server"
