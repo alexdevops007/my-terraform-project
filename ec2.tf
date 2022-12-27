@@ -72,7 +72,7 @@ data "aws_ami" "amazon_linux_2" {
 }
 
 # launch the ec2 instance and install website
-resource "aws_instance" "ec2_instance" {
+resource "aws_instance" "mathy_atis" {
   ami = data.aws_ami.amazon_linux_2.id
   instance_type = "t2.micro"
   subnet_id = aws_default_subnet.default_az1.id
@@ -87,5 +87,5 @@ resource "aws_instance" "ec2_instance" {
 
 # print the ec2's public ipv4 address
 output "public_ipv4_address" {
-  value = aws_instance.ec2_instance.public_ip
+  value = aws_instance.mathy_atis.public_ip
 }
